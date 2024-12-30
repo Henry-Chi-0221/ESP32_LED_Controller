@@ -1,0 +1,71 @@
+esphome:
+  name: controller
+  friendly_name: controller
+
+esp32:
+  board: esp32-s2-saola-1
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "TOKEN"
+
+ota:
+  - platform: esphome
+    password: "PASSWORD"
+
+wifi:
+  ssid: "SSID"
+  password: "PASSWORD"
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Controller Fallback Hotspot"
+    password: "PASSWORD"
+    
+  manual_ip:
+    static_ip: 192.168.1.xxx
+    gateway: 192.168.1.x
+    subnet: 255.255.255.x
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  
+captive_portal:
+    
+output:
+  - platform: ledc
+    pin: GPIO1
+    id: gpio_1
+
+# Example usage in a light
+light:
+  - platform: monochromatic
+    output: gpio_1
+    name: "controller"
+
+remote_transmitter:
+  pin: GPIO2
+  carrier_duty_percent: 20%
+  
+# Individual switches for IR emitter
+
+switch:
+  - platform: template
+    name: "light_on"
+    id: light_on
+    turn_on_action:
+      - remote_transmitter.transmit_lg:
+          data: 0x157BFF00
+          nbits: 32
+          
+  - platform: template
+    name: "light_off"
+    id: light_off
+    turn_on_action:
+      - remote_transmitter.transmit_lg:
+          data: 0x157B807F
+          nbits: 32
